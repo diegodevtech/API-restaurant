@@ -5,7 +5,8 @@
   "main": "server.ts",
   "author": "Diego Cunha",
   "scripts": {
-    "dev": "tsx watch src/server.ts"
+    "dev": "tsx watch src/server.ts",
+    "knex": "node --import tsx ./node_modules/.bin/knex"
   },
   "repository": {
     "type": "git",
