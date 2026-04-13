@@ -50,6 +50,16 @@ class ProductController {
       next(error);
     }
   }
+
+  async deleteProduct(request: Request, response: Response, next: NextFunction){
+    try {
+      const id = z.string().transform((value) => Number(value)).refine((value) => !isNaN(value) && value > 0, { message: "Invalid id" }).parse(request.params.id);
+      await knex<ProductRepository>("products").delete().where({ id });
+      return response.json();
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 export { ProductController };
