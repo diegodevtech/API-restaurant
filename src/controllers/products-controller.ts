@@ -77,11 +77,3 @@ class ProductController {
 }
 
 export { ProductController };
-
-// async createProduct(request: Request, response: Response, next: NextFunction) {
-//     try{
-//       return response.json({ message: "OK" });
-//     } catch (error) {
-//       next(error);
-//     }
-//   }
