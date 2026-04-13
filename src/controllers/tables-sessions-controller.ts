@@ -5,6 +5,18 @@ import { TablesSessionsRepository } from "@/database/types/tables-sessions-repos
 import { AppError } from "@/utils/AppError";
 
 class TablesSessionsController {
+
+  async getAllSessions(request: Request, response: Response, next: NextFunction) {
+    
+    try {
+      const tablesSessions = await knex<TablesSessionsRepository>("tables_sessions").select().orderBy("closed_at");
+      return response.json(tablesSessions);
+
+    } catch (error) {
+      next(error);
+    }
+  }
+
   async createSession(request: Request, response: Response, next: NextFunction) {
     try {
 
