@@ -43,6 +43,12 @@ class ProductController {
 
       const { name, price } = bodySchema.parse(request.body);
 
+      const product = await knex<ProductRepository>("products").select().where({ id }).first();
+
+      if(!product) {
+        return response.status(404).json({ message: "Product not found" });
+      }
+
       await knex<ProductRepository>("products").update({ name, price, updated_at: knex.fn.now() }).where({ id });
 
       return response.json();
@@ -54,6 +60,13 @@ class ProductController {
   async deleteProduct(request: Request, response: Response, next: NextFunction){
     try {
       const id = z.string().transform((value) => Number(value)).refine((value) => !isNaN(value) && value > 0, { message: "Invalid id" }).parse(request.params.id);
+
+      const product = await knex<ProductRepository>("products").select().where({ id }).first();
+
+      if(!product) {
+        return response.status(404).json({ message: "Product not found" });
+      }
+
       await knex<ProductRepository>("products").delete().where({ id });
       return response.json();
     } catch (error) {
