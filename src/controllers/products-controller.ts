@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import { knex } from "../database/knex";
 import { z } from "zod";
+import { AppError } from "@/utils/AppError";
 
 class ProductController {
   async getAllProducts(request: Request, response: Response, next: NextFunction) {
@@ -46,7 +47,7 @@ class ProductController {
       const product = await knex<ProductRepository>("products").select().where({ id }).first();
 
       if(!product) {
-        return response.status(404).json({ message: "Product not found" });
+        throw new AppError("Product not found", 404);
       }
 
       await knex<ProductRepository>("products").update({ name, price, updated_at: knex.fn.now() }).where({ id });
@@ -64,7 +65,7 @@ class ProductController {
       const product = await knex<ProductRepository>("products").select().where({ id }).first();
 
       if(!product) {
-        return response.status(404).json({ message: "Product not found" });
+        throw new AppError("Product not found", 404);
       }
 
       await knex<ProductRepository>("products").delete().where({ id });
