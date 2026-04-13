@@ -32,6 +32,24 @@ class ProductController {
       next(error);
     }
   }
+
+  async updateProduct(request: Request, response: Response, next: NextFunction) {
+    try {
+      const id = z.string().transform((value) => Number(value)).refine((value) => !isNaN(value) && value > 0, { message: "Invalid id" }).parse(request.params.id);
+      const bodySchema = z.object({
+        name: z.string().trim().min(6).max(100).optional(),
+        price: z.number().positive().optional()
+      });
+
+      const { name, price } = bodySchema.parse(request.body);
+
+      await knex<ProductRepository>("products").update({ name, price, updated_at: knex.fn.now() }).where({ id });
+
+      return response.json();
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 export { ProductController };
