@@ -1,6 +1,8 @@
 import { Request, Response, NextFunction } from "express";
 import { knex } from "@/database/knex";
 import { z } from "zod";
+import { TablesSessionsRepository } from "@/database/types/tables-sessions-repository";
+import { AppError } from "@/utils/AppError";
 
 class OrdersController {
   async getAllOrders(request: Request, response: Response, next: NextFunction) {}
@@ -15,8 +17,23 @@ class OrdersController {
 
       const { table_session_id, product_id, quantity } = bodySchema.parse(request.body);
 
-      return response.status(201).json();
-      
+      const session = await knex<TablesSessionsRepository>("tables_sessions").where("id", table_session_id).first();
+      const product = await knex<ProductRepository>("products").where("id", product_id).first();
+
+      if (!session) {
+        throw new AppError("Table session not found", 404);
+      }
+
+      if(session.closed_at) {
+        throw new AppError("Table session is closed", 400);
+      }
+
+      if(!product) {
+        throw new AppError("Product not found", 404);
+      }
+
+      return response.status(201).json(session);
+
     } catch (error) {
       next(error);
     }
