@@ -18,9 +18,26 @@ class OrdersController {
     try {
       const { table_session_id } = request.params;
       const order = await knex<OrderRepository>("orders")
-      .select("orders.id as order_id", "orders.table_session_id", "orders.product_id", "orders.total_price", "orders.quantity", "products.name as product_name")
+      .select("orders.id as order_id", "orders.table_session_id", "orders.product_id", "orders.price", "orders.quantity", "orders.created_at", "orders.updated_at", "products.name as product_name", knex.raw("(orders.price * orders.quantity) AS total"))
       .join("products", "products.id", "orders.product_id")
-      .where("table_session_id", table_session_id);
+      .where("table_session_id", table_session_id)
+      .orderBy("orders.created_at", "desc");
+      return response.json(order);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async closeOrder(request: Request, response: Response, next: NextFunction) {
+    try {
+      const { table_session_id } = request.params;
+      const order = await knex<OrderRepository>("orders")
+      .select(
+        knex.raw("COALESCE(SUM(orders.price * orders.quantity), 0) AS total")
+      )
+      .where("table_session_id", table_session_id)
+      .first();
+
       return response.json(order);
     } catch (error) {
       next(error);
@@ -56,7 +73,7 @@ class OrdersController {
         table_session_id,
         product_id,
         quantity,
-        total_price: product.price * quantity,
+        price: product.price,
         created_at: knex.fn.now(),
         updated_at: knex.fn.now()
       });
@@ -67,6 +84,8 @@ class OrdersController {
       next(error);
     }
   }
+
+
 }
 
 export { OrdersController };
