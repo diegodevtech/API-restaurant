@@ -14,6 +14,16 @@ class OrdersController {
     }
   }
 
+  async getOrderByTableSessionId(request: Request, response: Response, next: NextFunction) {
+    try {
+      const { id } = request.params;
+      const order = await knex<OrderRepository>("orders").where("table_session_id", id).first();
+      return response.json(order);
+    } catch (error) {
+      next(error);
+    }
+  }
+
   async createOrder(request: Request, response: Response, next: NextFunction) {
     try {
       const bodySchema = z.object({
