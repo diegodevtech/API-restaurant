@@ -7,7 +7,7 @@ import { AppError } from "@/utils/AppError";
 class OrdersController {
   async getAllOrders(request: Request, response: Response, next: NextFunction) {
     try {
-      const orders = await knex<OrderRepository>("orders").select();
+      const orders = await knex<OrderRepository>("orders").select().orderBy("");
       return response.json(orders);
     } catch (error) {
       next(error);
@@ -28,7 +28,7 @@ class OrdersController {
     }
   }
 
-  async closeOrder(request: Request, response: Response, next: NextFunction) {
+  async showOrderTotal(request: Request, response: Response, next: NextFunction) {
     try {
       const { table_session_id } = request.params;
       const order = await knex<OrderRepository>("orders")
