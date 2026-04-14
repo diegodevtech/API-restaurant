@@ -5,7 +5,14 @@ import { TablesSessionsRepository } from "@/database/types/tables-sessions-repos
 import { AppError } from "@/utils/AppError";
 
 class OrdersController {
-  async getAllOrders(request: Request, response: Response, next: NextFunction) {}
+  async getAllOrders(request: Request, response: Response, next: NextFunction) {
+    try {
+      const orders = await knex<OrderRepository>("orders").select();
+      return response.json(orders);
+    } catch (error) {
+      next(error);
+    }
+  }
 
   async createOrder(request: Request, response: Response, next: NextFunction) {
     try {
@@ -32,7 +39,16 @@ class OrdersController {
         throw new AppError("Product not found", 404);
       }
 
-      return response.status(201).json(session);
+      await knex<OrderRepository>("orders").insert({ 
+        table_session_id,
+        product_id,
+        quantity,
+        total_price: product.price * quantity,
+        created_at: knex.fn.now(),
+        updated_at: knex.fn.now()
+      });
+
+      return response.status(201).json();
 
     } catch (error) {
       next(error);
